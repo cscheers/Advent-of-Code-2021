@@ -53,11 +53,11 @@ public class Day15 {
         int row = 0, col = 0;
         System.out.println("Total number of iterations: " + (rows * columns));
         int iteration = 0;
-        int startColumn = 0, endColumn = columns - 1;
+        int startRow = 0, endRow = rows - 1;
         while (true) {
             if (++iteration % 10000 == 0) {
                 System.out.print("Iteration: " +  iteration);
-                System.out.println(", start column: " + startColumn + ", end column: " + endColumn);
+                System.out.println(", start row: " + startRow + ", end row: " + endRow);
             }
             int risk = risks[row][col]; // Minimum risk from 0, 0 to row, col
             visit(risk, row, col + 1); // Go right
@@ -67,10 +67,10 @@ public class Day15 {
             accounted[row][col] = true;
             // Select next element
             int minRisk = Integer.MAX_VALUE;
-            for (int j = startColumn; j < columns; j++) {
+            for (int i = startRow; i < rows; i++) {
                 boolean allMaxValues = true;
                 boolean allAccounted = true;
-                for (int i = 0; i < rows; i++) {
+                for (int j = 0; j < columns; j++) {
                     if (accounted[i][j]) {
                         allMaxValues = false;
                         continue;
@@ -85,11 +85,11 @@ public class Day15 {
                         allMaxValues = false;
                     }
                 }
-                if (allAccounted && j == startColumn) {
-                    startColumn++;
+                if (allAccounted && i == startRow) {
+                    startRow++;
                 }
                 if (allMaxValues) {
-                    endColumn = j;
+                    endRow = i;
                     break;
                 }
             }
