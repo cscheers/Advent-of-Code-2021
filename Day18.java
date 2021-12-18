@@ -25,7 +25,6 @@ public class Day18 {
 
     static void readFile(File file) throws FileNotFoundException {
         Scanner scanner = new Scanner(file);
-        scanner.useDelimiter("\\[");
         Pair all = null;
         while(scanner.hasNextLine()) {
             String line = scanner.nextLine();
