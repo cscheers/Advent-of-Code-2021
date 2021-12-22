@@ -21,7 +21,6 @@ public class Day5 {
             Point from = new Point(Integer.valueOf(left[0]), Integer.valueOf(left[1]));
             String[] right = tokens[2].split(",");
             Point to = new Point(Integer.valueOf(right[0]), Integer.valueOf(right[1]));
-//            System.out.println("from: " + from + ", to: " + to);
             fromPoints.add(from);
             toPoints.add(to);
         }
