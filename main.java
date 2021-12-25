@@ -8,7 +8,8 @@ public class main {
 //        Day3.go();
 //        Day4.go();
 //        Day5.go();
-////        Day6.go();
+        Day6.go();
+////        Day7.go();
 //        Day8.go();
 //        Day9.go();
 //        Day10.go();
@@ -26,6 +27,6 @@ public class main {
 //        Day22.go();
 //        Day23.go();
 ///        Day24.go();
-        Day25.go();
+///        Day25.go();
     }
 }
