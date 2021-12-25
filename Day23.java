@@ -8,52 +8,40 @@ import java.util.ArrayList;
 public class Day23 {
 
     static char[][] burrow;
-    static Point[][] amphipods = new Point[4][2];
+    static Point[][] amphipods;
     static int[] podCost = {1, 10, 100, 1000};
     static List<char[][]> history = new ArrayList<char[][]>();
     static List<Integer> costHistory = new ArrayList<Integer>();
+    static int moveCount, minSoFar;
 
-    static void readFile(File file) throws FileNotFoundException {
+    static void readFile(File file, boolean firstStar) throws FileNotFoundException {
         Scanner fs = new Scanner(file);
         int row = 0;
+        moveCount = 0;
+        minSoFar = Integer.MAX_VALUE;
+        burrow = null;
         while(fs.hasNextLine()) {
             String line = fs.nextLine();
-            System.out.println(line);
             if (burrow == null) {
-                burrow = new char[3][line.length() - 2];
-                System.out.println("Hallway length: " + burrow[0].length);
-            } else if (row < 3) {
+                burrow = new char[firstStar ? 3 : 5][line.length() - 2];
+            } else if (row < burrow.length) {
+                if (firstStar && row == 2) {
+                    line = fs.nextLine(); // Skip two lines
+                    line = fs.nextLine();
+                }
                 for (int i = 0; i < line.length() - 2; i++) {
                     burrow[row][i] = line.charAt(i + 1);
                 }                
-                System.out.println(new String(burrow[row]));
                 row++;
             }
         }
         burrow[2][9] = '#';
-    }
-
-    static void readFile2(File file) throws FileNotFoundException {
-        Scanner fs = new Scanner(file);
-        int row = 0;
-        while(fs.hasNextLine()) {
-            String line = fs.nextLine();
-            System.out.println(line);
-            if (burrow == null) {
-                burrow = new char[5][line.length() - 2];
-                System.out.println("Hallway length: " + burrow[0].length);
-            } else if (row < 5) {
-                for (int i = 0; i < line.length() - 2; i++) {
-                    burrow[row][i] = line.charAt(i + 1);
-                }                
-                System.out.println(new String(burrow[row]));
-                row++;
-            }
+        if (!firstStar) {
+            burrow[3][9] = '#';
+            burrow[4][9] = '#';
         }
-        burrow[2][9] = '#';
-        burrow[3][9] = '#';
-        burrow[4][9] = '#';
-        amphipods = new Point[4][4];
+        amphipods = new Point[4][firstStar ? 2 : 4];
+        getPositions();
     }
 
     static void getPositions() {
@@ -61,18 +49,27 @@ public class Day23 {
             for (int j = 0; j < burrow[i].length; j++) {
                 int row = burrow[i][j] - 'A';
                 if (row < 0 || row > 3) {
-                    continue;
+                    continue; // Must be dot ('.') or hash ('#')
                 }
                 Point[] pair = amphipods[row];
-                if (pair[0] == null) {
-                    pair[0] = new Point(i, j);
-                } else if (pair[1] == null) {
-                    pair[1] = new Point(i, j);
-                } else if (pair[2] == null) {
-                    pair[2] = new Point(i, j);
-                } else {
-                    pair[3] = new Point(i, j);
+                for (int k = 0; k < 4; k++) {
+                    if (pair[k] == null) {
+                        pair[k] = new Point(i, j);
+                        break;
+                    }
                 }
+            }
+        }
+    }
+
+    static void showBurrow(String message) {
+        System.out.println(message);
+        for (char[] row : burrow) {
+            System.out.println(new String(row));
+        }
+        for (Point[] pair : amphipods) {
+            for (int p = 0; p < pair.length; p++) {
+                System.out.println(pair[p]);
             }
         }
     }
@@ -136,10 +133,10 @@ public class Day23 {
 
     static void moveInsideRoom(int pod, int col, List<Point> moves, List<Integer> costs) {
         int target = pod * 2 + 2;
-        System.out.println("Target room: " + target);
+//        System.out.println("Target room: " + target);
         int delta = Math.abs(col - target);
         int step = col < target ? 1 : - 1;
-        System.out.println("pod: " + pod + ", col: " + col + ", target: " + target + ", step: " + step);
+//        System.out.println("pod: " + pod + ", col: " + col + ", target: " + target + ", step: " + step);
         if (col == 2) {
 
         }
@@ -186,18 +183,6 @@ public class Day23 {
             moveOutsideRoom(pod, pos.y, 2, moves, costs);
         } else { // In hallway - try to move into a room
             moveInsideRoom(pod, pos.y, moves, costs);
-        }
-    }
-
-    static void showBurrow(String message) {
-        System.out.println(message);
-        for (char[] row : burrow) {
-            System.out.println(new String(row));
-        }
-        for (Point[] pair : amphipods) {
-            for (int p = 0; p < pair.length; p++) {
-                System.out.println(pair[p]);
-            }
         }
     }
 
@@ -250,29 +235,22 @@ public class Day23 {
         costHistory.add(cost);
     }
 
-    static int moveCount = 0;
-    static boolean foundSolution = false;
-    static int minSoFar = Integer.MAX_VALUE;
-
     static void play(int cost) {        
         moveCount++;
         if (cost > minSoFar) {
             return;
         }
 
-        if (foundSolution) {
-            return;
-        }
 //        if (moveCount++ >= 2000) {
 //            System.out.println("Just bail out ...");
 //            return;
 //        }
 //        showBurrow("At entry: " + cost);
         if (home()) {
-            System.out.println("Reached one path home: " + cost);
-            minSoFar = Math.min(minSoFar, cost);
-//            foundSolution = true;
-//            showBurrow("At entry");
+            if (cost < minSoFar) {
+                System.out.println("Reached one path home: " + cost);
+                minSoFar = cost;
+            }
             return;
         }
         if (visited(cost)) {
@@ -414,36 +392,18 @@ public class Day23 {
         }
     }
 
-    static void playHard(int cost, int nesting) {        
+    static void playHard(int cost) {
         moveCount++;
-//        if (nesting > 4) {
-//            System.out.println("Too much nesting ...");
-//            return;
-//        }
         if (cost > minSoFar) {
             return;
         }
-
-        if (foundSolution) {
-            return;
-        }
-//        if (moveCount++ >= 2000) {
-//            System.out.println("Just bail out ...");
-//            return;
-//        }
-//        showBurrow("At entry: " + cost);
         if (homeHard()) {
-            System.out.println("Reached one path home: " + cost);
-            minSoFar = Math.min(minSoFar, cost);
-//            foundSolution = true;
-//            showBurrow("Reached");
+            if (cost < minSoFar) {
+                System.out.println("Reached shorter path home: " + cost);
+                minSoFar = cost;
+            }
             return;
         }
-        if (visited(cost)) {
-//            System.out.println("Seen this already");
-            return;
-        }
-//        addToHistory(cost);
         for (Point[] pair : amphipods) {
             for (int p = 0; p < pair.length; p++) {
                 Point pos = pair[p];
@@ -493,7 +453,7 @@ public class Day23 {
                     burrow[pos.x][pos.y] = '.';
                     burrow[newPos.x][newPos.y] = podName;
                     pair[p] = newPos;
-                    playHard(cost + extraCost, nesting + 1);
+                    playHard(cost + extraCost);
                     // Restore
                     burrow[newPos.x][newPos.y] = '.';
                     burrow[pos.x][pos.y] = podName;
@@ -506,12 +466,14 @@ public class Day23 {
 
     public static void go() throws FileNotFoundException {
         System.out.println("Day 23");
-        readFile2(new File("data/day23.txt"));
-        getPositions();
+        readFile(new File("data/day23.txt"), true);
         showBurrow("Initial");
+        play(0);
+        System.out.println("Number of moves: " + moveCount);
 
-//        play(0);
-        playHard(0, 0);
+        readFile(new File("data/day23.txt"), false);
+        showBurrow("Initial");
+        playHard(0);
         System.out.println("Number of moves: " + moveCount);
     }
 }
