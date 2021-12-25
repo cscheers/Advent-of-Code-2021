@@ -298,6 +298,11 @@ public class Day23 {
 
 
 
+
+
+
+
+
     static boolean homeHard() {
         boolean home = burrow[1][2] == 'A' && burrow[2][2] == 'A' &&
                        burrow[1][4] == 'B' && burrow[2][4] == 'B' &&
@@ -392,6 +397,16 @@ public class Day23 {
         }
     }
 
+    static boolean rowsBelowMatch(Point pos, int pod) {
+        for (int row = pos.x + 1; row < burrow.length; row++) {
+            char nextPodName = burrow[row][pos.y];
+            if (nextPodName - 'A' != pod) {
+                return false;
+            }
+        }
+        return true;
+    }
+
     static void playHard(int cost) {
         moveCount++;
         if (cost > minSoFar) {
@@ -409,39 +424,8 @@ public class Day23 {
                 Point pos = pair[p];
                 char podName = burrow[pos.x][pos.y];
                 int pod = podName - 'A';
-                if (pos.x == 4 && pos.y - 2 == pod * 2) {
-//                    System.out.println("Don't move this one from level 4: " + podName);
-                    continue;
-                }
-                if (pos.x == 3 && pos.y - 2 == pod * 2) {
-                    char nextPodName = burrow[4][pos.y];
-                    if (nextPodName - 'A' == pod) {
-//                        System.out.println("Don't move this one from level 3: " + podName);
-                        continue;
-                    }
-                }
-                if (pos.x == 2 && pos.y - 2 == pod * 2) {
-                    char nextPodName = burrow[4][pos.y];
-                    if (nextPodName - 'A' == pod) {
-                        nextPodName = burrow[3][pos.y];
-                        if (nextPodName - 'A' == pod) {
-//                            System.out.println("Don't move this one from level 2: " + podName);
-                            continue;
-                        }
-                    }
-                }
-                if (pos.x == 1 && pos.y - 2 == pod * 2) {
-                    char nextPodName = burrow[4][pos.y];
-                    if (nextPodName - 'A' == pod) {
-                        nextPodName = burrow[3][pos.y];
-                        if (nextPodName - 'A' == pod) {
-                            nextPodName = burrow[2][pos.y];
-                            if (nextPodName - 'A' == pod) {
-//                                System.out.println("Don't move this one from level 1: " + podName);
-                                continue;
-                            }
-                        }
-                    }
+                if (pos.y - 2 == pod * 2 && rowsBelowMatch(pos, pod)) {
+                    continue; // Correct column and rows below match, don't move this one
                 }
                 List<Point> moves = new ArrayList<Point>();
                 List<Integer> costs = new ArrayList<Integer>();
@@ -458,7 +442,6 @@ public class Day23 {
                     burrow[newPos.x][newPos.y] = '.';
                     burrow[pos.x][pos.y] = podName;
                     pair[p] = pos;
-//                    showBurrow("restored");
                 }
             }
         }
