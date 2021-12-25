@@ -77,8 +77,6 @@ public class Day25 {
         int steps = 0;
         while (moved()) {
             steps++;
-//            System.out.println("After " + steps + " steps");
-//            showFloor();
         }
         steps++;
         System.out.println("Floor stops moving after " + steps + " steps");

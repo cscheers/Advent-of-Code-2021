@@ -35,9 +35,7 @@ public class Day24 {
     static boolean processInstruction(String[] instr) {
         char arg1 = instr[1].charAt(0);
         if ("inp".equals(instr[0])) {
-//            System.out.println("Exe => " + instr[0] + " " + instr[1]);
             long val = nextInput();
-//            System.out.println(arg1 + " = " + val);
             vars.put(arg1, val);
             return true;
         }
@@ -46,28 +44,21 @@ public class Day24 {
         long arg2Value = c == 'x' || c == 'y' || c == 'z' || c == 'w' ?
                          vars.get(c) : Long.valueOf(instr[2]);
         long result = 0;
-//        System.out.println("Exe => " + instr[0] + " " + instr[1] + " " + instr[2]);
         if ("add".equals(instr[0])) {
             result = arg1Value + arg2Value;
-//            System.out.println("Setting " + arg1 + " to sum of " + arg1Value + " and " + arg2Value + " = " + result);
         } else if ("mul".equals(instr[0])) {
             result = arg1Value * arg2Value;
-//            System.out.println("Setting " + arg1 + " to product of " + arg1Value + " and " + arg2Value + " = " + result);
         } else if ("div".equals(instr[0])) {
             result = arg1Value / arg2Value;
-//            System.out.println("Setting " + arg1 + " to " + arg1Value + " divided by " + arg2Value + " = " + result);
         } else if ("mod".equals(instr[0])) {
             result = arg1Value % arg2Value;
-//            System.out.println("Setting " + arg1 + " to " + arg1Value + " % " + arg2Value + " = " + result);
         } else if ("eql".equals(instr[0])) {
             result = arg1Value == arg2Value ? 1 : 0;
-//            System.out.println("Setting " + arg1 + " to " + arg1Value + " equals " + arg2Value + " = " + result);
         } else {
             System.out.println("Unknown instruction: " + instr[0]);
             return false;
         }
         vars.put(arg1, result);
-//        System.out.println("x = " + vars.get('x') + ", y = " + vars.get('y')  + ", z = " + vars.get('z')  + ", w = " + vars.get('w'));
         return true;
     }
 
@@ -118,20 +109,15 @@ public class Day24 {
             int a = constants.get(i)[0];
             int b = constants.get(i)[1];
             int c = constants.get(i)[2];
-//            System.out.println("[a, b, c] = " + a + ", " + b + ", " + c + "]");
             if (a == 1) {
                 prevOnes.push(new Point(i, c));
             } else {
                 Point prevOne = prevOnes.pop();
                 int prevI = prevOne.x;
                 int prevC = prevOne.y;
-//                System.out.println("pop prevs: " + prevOne);
                 int complement = prevC + b;
-//                System.out.println("complement:" + complement);
                 digits[prevI] = firstStar ? Math.min(9, 9 - complement) : Math.max(1, 1 - complement);
-//                System.out.println("Digits[" + prevI + "] =" + digits[prevI]);
                 digits[i] = digits[prevI] + complement;
-//                System.out.println("Digits[" + i + "] =" + digits[i]);
             }
         }
         System.out.print("Model number: ");

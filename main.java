@@ -27,6 +27,6 @@ public class main {
 //        Day22.go();
 //        Day23.go();
         Day24.go();
-///        Day25.go();
+        Day25.go();
     }
 }
