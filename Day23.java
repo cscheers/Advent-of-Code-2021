@@ -4,17 +4,16 @@ import java.io.FileNotFoundException;
 import java.awt.Point;
 import java.util.List;
 import java.util.ArrayList;
-import java.util.Set;
-import java.util.HashSet;
+import java.util.Map;
+import java.util.HashMap;
 
 public class Day23 {
 
     static char[][] burrow;
     static Point[][] amphipods;
     static int[] podCost = {1, 10, 100, 1000};
-    static List<Integer> costHistory = new ArrayList<Integer>();
     static int moveCount, minSoFar;
-    static Set<char[][]> history = new HashSet<char[][]>();
+    static Map<String, Integer> history = new HashMap<String, Integer>();
 
     static void readFile(File file, boolean firstStar) throws FileNotFoundException {
         Scanner fs = new Scanner(file);
@@ -74,6 +73,14 @@ public class Day23 {
                 System.out.println(pair[p]);
             }
         }
+    }
+
+    static String getBurrowKey() {
+        StringBuffer key = new StringBuffer();
+        for (int row = 0; row < burrow.length; row++) {
+            key.append(burrow[row]);
+        }
+        return key.toString();
     }
 
     static boolean home() { // Just checking top elements should be enough ?
@@ -181,6 +188,12 @@ public class Day23 {
         if (cost > minSoFar) {
             return;
         }
+        String key = getBurrowKey();
+        Integer prevCost = history.get(key);
+        if (prevCost != null && prevCost < cost) {
+            return; //  Been here before at a lower cost
+        }
+        history.put(key, cost);
         if (home()) {
             if (cost < minSoFar) {
                 System.out.println("Reached shorter path home: " + cost);
@@ -220,6 +233,8 @@ public class Day23 {
         System.out.println("Day 23");
         readFile(new File("data/day23.txt"), true);
         showBurrow("Initial");
+//        System.out.println("Key: " + getBurrowKey());
+//        if (true) return;
         play(0);
         System.out.println("Number of moves: " + moveCount);
 
