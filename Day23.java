@@ -15,6 +15,15 @@ public class Day23 {
     static int moveCount, minSoFar;
     static Map<String, Integer> history = new HashMap<String, Integer>();
 
+    static class Move {
+        Move(Point pos, int cost) {
+            this.pos = pos;
+            this.cost = cost;
+        }
+        Point pos;
+        int cost;
+    }
+
     static void readFile(File file, boolean firstStar) throws FileNotFoundException {
         Scanner fs = new Scanner(file);
         int row = 0;
@@ -94,39 +103,35 @@ public class Day23 {
         return true;
     }
 
-    static void moveOutsideRight(int pod, int col, int steps, List<Point> moves, List<Integer> costs) {
+    static void moveOutsideRight(int pod, int col, int steps, List<Move> moves) {
         int cost = steps * podCost[pod];
         while (col < 10 && burrow[0][col] == '.') { // No blockage
-            moves.add(new Point(0, col));
-            costs.add(cost);
+            moves.add(new Move(new Point(0, col), cost));
             col += 2;
             cost += 2 * podCost[pod];
         }
         if (col == 11 && burrow[0][10] == '.') { // No blockage
             cost -= podCost[pod];
-            moves.add(new Point(0, 10));
-            costs.add(cost);
+            moves.add(new Move(new Point(0, 10), cost));
         }
     }
 
-    static void moveOutsideLeft(int pod, int col, int steps, List<Point> moves, List<Integer> costs) {
+    static void moveOutsideLeft(int pod, int col, int steps, List<Move> moves) {
         int cost = steps * podCost[pod];
         while (col > 0 && burrow[0][col] == '.') {
-            moves.add(new Point(0, col));
-            costs.add(cost);
+            moves.add(new Move(new Point(0, col), cost));
             col -= 2;
             cost += 2 * podCost[pod];
         }
         if (col == -1 && burrow[0][0] == '.') { // No blockage
             cost -= podCost[pod];
-            moves.add(new Point(0, 0));
-            costs.add(cost);
+            moves.add(new Move(new Point(0, 0), cost));
         }
     }
 
-    static void moveOutsideRoom(int pod, int col, int steps, List<Point> moves, List<Integer> costs) {
-        moveOutsideLeft(pod, col - 1, steps, moves, costs);
-        moveOutsideRight(pod, col + 1, steps, moves, costs);
+    static void moveOutsideRoom(int pod, int col, int steps, List<Move> moves) {
+        moveOutsideLeft(pod, col - 1, steps, moves);
+        moveOutsideRight(pod, col + 1, steps, moves);
     }
 
     static boolean hallwayClear(int startCol, int targetCol) {
@@ -139,7 +144,7 @@ public class Day23 {
         return true;
     }
 
-    static void moveInsideRoom(int pod, int col, List<Point> moves, List<Integer> costs) {
+    static void moveInsideRoom(int pod, int col, List<Move> moves) {
         int target = pod * 2 + 2;
         if (!hallwayClear(col, target)) {
             return;
@@ -153,15 +158,14 @@ public class Day23 {
             row--;
         }
         int cost = (horizontalSteps + row) * podCost[pod];
-        moves.add(new Point(row, target));
-        costs.add(cost);
+        moves.add(new Move(new Point(row, target), cost));
     }
 
-    static void findPossibleMoves(Point pos, List<Point> moves, List<Integer> costs) {
+    static void findPossibleMoves(Point pos, List<Move> moves) {
         char podName = burrow[pos.x][pos.y];
         int pod = podName - 'A';
         if (pos.x == 0) { // In the hallway, try to move into a room
-            moveInsideRoom(pod, pos.y, moves, costs);
+            moveInsideRoom(pod, pos.y, moves);
             return;
         }
         // In a room, try to move out
@@ -170,7 +174,7 @@ public class Day23 {
                 return; // Blocked, can't move out
             }
         }
-        moveOutsideRoom(pod, pos.y, pos.x + 1, moves, costs);
+        moveOutsideRoom(pod, pos.y, pos.x + 1, moves);
     }
 
     static boolean rowsBelowMatch(Point pos, int pod) {
@@ -209,13 +213,13 @@ public class Day23 {
                 if (pos.y - 2 == pod * 2 && rowsBelowMatch(pos, pod)) {
                     continue; // Correct column and rows below match, don't move this one
                 }
-                List<Point> moves = new ArrayList<Point>();
-                List<Integer> costs = new ArrayList<Integer>();
-                findPossibleMoves(pos, moves, costs);
-//                System.out.println("# possible moves for: " + podName + ": " + moves);
-                for (int i = 0; i < moves.size(); i++) {
-                    Point newPos = moves.get(i);
-                    int extraCost = costs.get(i);
+                List<Move> moves = new ArrayList<Move>();
+                findPossibleMoves(pos, moves);
+                // Not much benefit from sorting these moves
+                moves.sort((m1, m2) -> (m1.cost - m2.cost));
+                for (Move move : moves) {
+                    Point newPos = move.pos;
+                    int extraCost = move.cost;
                     burrow[pos.x][pos.y] = '.';
                     burrow[newPos.x][newPos.y] = podName;
                     pair[p] = newPos;
@@ -233,14 +237,14 @@ public class Day23 {
         System.out.println("Day 23");
         readFile(new File("data/day23.txt"), true);
         showBurrow("Initial");
-//        System.out.println("Key: " + getBurrowKey());
-//        if (true) return;
         play(0);
         System.out.println("Number of moves: " + moveCount);
+        System.out.println("Number of board positions: " + history.size());
 
         readFile(new File("data/day23.txt"), false);
         showBurrow("Initial");
         play(0);
         System.out.println("Number of moves: " + moveCount);
+        System.out.println("Number of board positions: " + history.size());
     }
 }
