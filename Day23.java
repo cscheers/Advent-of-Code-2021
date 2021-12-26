@@ -118,7 +118,7 @@ public class Day23 {
 
     static void moveOutsideLeft(int pod, int col, int steps, List<Move> moves) {
         int cost = steps * podCost[pod];
-        while (col > 0 && burrow[0][col] == '.') {
+        while (col > 0 && burrow[0][col] == '.') { // No blockage
             moves.add(new Move(new Point(0, col), cost));
             col -= 2;
             cost += 2 * podCost[pod];
@@ -236,13 +236,13 @@ public class Day23 {
     public static void go() throws FileNotFoundException {
         System.out.println("Day 23");
         readFile(new File("data/day23.txt"), true);
-        showBurrow("Initial");
+        showBurrow("Starting position");
         play(0);
         System.out.println("Number of moves: " + moveCount);
         System.out.println("Number of board positions: " + history.size());
 
         readFile(new File("data/day23.txt"), false);
-        showBurrow("Initial");
+        showBurrow("Starting position");
         play(0);
         System.out.println("Number of moves: " + moveCount);
         System.out.println("Number of board positions: " + history.size());
