@@ -4,15 +4,17 @@ import java.io.FileNotFoundException;
 import java.awt.Point;
 import java.util.List;
 import java.util.ArrayList;
+import java.util.Set;
+import java.util.HashSet;
 
 public class Day23 {
 
     static char[][] burrow;
     static Point[][] amphipods;
     static int[] podCost = {1, 10, 100, 1000};
-    static List<char[][]> history = new ArrayList<char[][]>();
     static List<Integer> costHistory = new ArrayList<Integer>();
     static int moveCount, minSoFar;
+    static Set<char[][]> history = new HashSet<char[][]>();
 
     static void readFile(File file, boolean firstStar) throws FileNotFoundException {
         Scanner fs = new Scanner(file);
@@ -74,63 +76,44 @@ public class Day23 {
         }
     }
 
-    static boolean homeHard() {
-        boolean home = burrow[1][2] == 'A' && burrow[2][2] == 'A' &&
-                       burrow[1][4] == 'B' && burrow[2][4] == 'B' &&
-                       burrow[1][6] == 'C' && burrow[2][6] == 'C' &&
-                       burrow[1][8] == 'D' && burrow[2][8] == 'D';
-        return home;
+    static boolean home() { // Just checking top elements should be enough ?
+        for (int row = 1; row < burrow.length; row++) {
+            for (int col = 2; col <= 8; col += 2) {
+                if (burrow[row][col] - 'A' != col / 2 - 1) {
+                    return false;
+                }
+            }
+        }
+        return true;
     }
 
     static void moveOutsideRight(int pod, int col, int steps, List<Point> moves, List<Integer> costs) {
         int cost = steps * podCost[pod];
-        while (col < 10) {
-            if (burrow[0][col] == '.') {
-//                System.out.println(pod + " can move to: (0, " + col + ") at cost: " + cost);
-                moves.add(new Point(0, col));
-                costs.add(cost);
-                col += 2;
-                cost += 2 * podCost[pod];
-            } else {
-//                System.out.println(pod + " can not move to: (0, " + col + "), occupied");
-                break;
-            }
+        while (col < 10 && burrow[0][col] == '.') { // No blockage
+            moves.add(new Point(0, col));
+            costs.add(cost);
+            col += 2;
+            cost += 2 * podCost[pod];
         }
-        if (col == 11) { // No blockage
-            if (burrow[0][10] == '.') {
-                cost -= podCost[pod];
-//                System.out.println(pod + " can move to: (0, 10) at cost: " + cost);
-                moves.add(new Point(0, 10));
-                costs.add(cost);
-            } else {
-//                System.out.println(pod + " can not move to (0, 10), occupied" );
-            }
+        if (col == 11 && burrow[0][10] == '.') { // No blockage
+            cost -= podCost[pod];
+            moves.add(new Point(0, 10));
+            costs.add(cost);
         }
     }
 
     static void moveOutsideLeft(int pod, int col, int steps, List<Point> moves, List<Integer> costs) {
         int cost = steps * podCost[pod];
-        while (col > 0) {
-            if (burrow[0][col] == '.') {
-//                System.out.println(pod + " can move to: (0, " + col + ") at cost: " + cost);
-                moves.add(new Point(0, col));
-                costs.add(cost);
-                col -= 2;
-                cost += 2 * podCost[pod];
-            } else {
-//                System.out.println(pod + " can not move to: (0, " + col + "), occupied");
-                break;
-            }
+        while (col > 0 && burrow[0][col] == '.') {
+            moves.add(new Point(0, col));
+            costs.add(cost);
+            col -= 2;
+            cost += 2 * podCost[pod];
         }
-        if (col == -1) { // No blockage
-            if (burrow[0][0] == '.') {
-                cost -= podCost[pod];
-//                System.out.println(pod + " can move to: (0, 0) at cost: " + cost);
-                moves.add(new Point(0, 0));
-                costs.add(cost);
-            } else {
-//                System.out.println(pod + " can not move to (0, 0), occupied" );
-            }
+        if (col == -1 && burrow[0][0] == '.') { // No blockage
+            cost -= podCost[pod];
+            moves.add(new Point(0, 0));
+            costs.add(cost);
         }
     }
 
@@ -149,7 +132,7 @@ public class Day23 {
         return true;
     }
 
-    static void moveInsideRoomHard(int pod, int col, List<Point> moves, List<Integer> costs) {
+    static void moveInsideRoom(int pod, int col, List<Point> moves, List<Integer> costs) {
         int target = pod * 2 + 2;
         if (!hallwayClear(col, target)) {
             return;
@@ -167,34 +150,20 @@ public class Day23 {
         costs.add(cost);
     }
 
-    static void findPossibleMovesHard(Point pos, List<Point> moves, List<Integer> costs) {
+    static void findPossibleMoves(Point pos, List<Point> moves, List<Integer> costs) {
         char podName = burrow[pos.x][pos.y];
         int pod = podName - 'A';
-//        System.out.println(podName + " is at " + pos + ", cost is: ");
-        int movingCost = 0;
-        if (pos.x == 4) {
-            if (burrow[3][pos.y] == '.' && burrow[2][pos.y] == '.' && burrow[1][pos.y] == '.') {
-                moveOutsideRoom(pod, pos.y, 5, moves, costs);
-            } else {
-//                System.out.println(pod + " can't move up");
-            }
-        } else if (pos.x == 3) {
-            if (burrow[2][pos.y] == '.' && burrow[1][pos.y] == '.') {
-                moveOutsideRoom(pod, pos.y, 4, moves, costs);
-            } else {
-//                System.out.println(pod + " can't move up");
-            }
-        } else if (pos.x == 2) {
-            if (burrow[1][pos.y] == '.') {
-                moveOutsideRoom(pod, pos.y, 3, moves, costs);
-            } else {
-//                System.out.println(pod + " can't move up");
-            }
-        } else if (pos.x == 1) {
-            moveOutsideRoom(pod, pos.y, 2, moves, costs);
-        } else { // In hallway - try to move into a room
-            moveInsideRoomHard(pod, pos.y, moves, costs);
+        if (pos.x == 0) { // In the hallway, try to move into a room
+            moveInsideRoom(pod, pos.y, moves, costs);
+            return;
         }
+        // In a room, try to move out
+        for (int row = 1; row < pos.x; row++) {
+            if (burrow[row][pos.y] != '.') {
+                return; // Blocked, can't move out
+            }
+        }
+        moveOutsideRoom(pod, pos.y, pos.x + 1, moves, costs);
     }
 
     static boolean rowsBelowMatch(Point pos, int pod) {
@@ -207,12 +176,12 @@ public class Day23 {
         return true;
     }
 
-    static void playHard(int cost) {
+    static void play(int cost) {
         moveCount++;
         if (cost > minSoFar) {
             return;
         }
-        if (homeHard()) {
+        if (home()) {
             if (cost < minSoFar) {
                 System.out.println("Reached shorter path home: " + cost);
                 minSoFar = cost;
@@ -229,7 +198,7 @@ public class Day23 {
                 }
                 List<Point> moves = new ArrayList<Point>();
                 List<Integer> costs = new ArrayList<Integer>();
-                findPossibleMovesHard(pos, moves, costs);
+                findPossibleMoves(pos, moves, costs);
 //                System.out.println("# possible moves for: " + podName + ": " + moves);
                 for (int i = 0; i < moves.size(); i++) {
                     Point newPos = moves.get(i);
@@ -237,7 +206,7 @@ public class Day23 {
                     burrow[pos.x][pos.y] = '.';
                     burrow[newPos.x][newPos.y] = podName;
                     pair[p] = newPos;
-                    playHard(cost + extraCost);
+                    play(cost + extraCost);
                     // Restore
                     burrow[newPos.x][newPos.y] = '.';
                     burrow[pos.x][pos.y] = podName;
@@ -251,12 +220,12 @@ public class Day23 {
         System.out.println("Day 23");
         readFile(new File("data/day23.txt"), true);
         showBurrow("Initial");
-        playHard(0);
+        play(0);
         System.out.println("Number of moves: " + moveCount);
 
         readFile(new File("data/day23.txt"), false);
         showBurrow("Initial");
-        playHard(0);
+        play(0);
         System.out.println("Number of moves: " + moveCount);
     }
 }
